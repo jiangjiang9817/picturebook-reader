@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#168f83">
+<title>绘本识字朗读</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f7f8;color:#213946;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:680px;margin:auto;padding:15px 14px 42px}header{display:flex;align-items:center;gap:11px;margin:7px 0 18px}.logo{background:#dff5ee;border-radius:15px;padding:12px;font-size:24px}h1{font-size:22px;margin:0}.sub{font-size:12px;color:#7b8991;margin-top:3px}.card{background:white;border-radius:20px;padding:15px;margin:12px 0;box-shadow:0 4px 18px #1b3b4a0a}.row{display:flex;gap:8px}.row>*{flex:1;min-width:0}button,.filebtn{border:0;border-radius:12px;padding:13px 9px;font-size:14px;font-weight:750;cursor:pointer;text-align:center}.green{background:#168f83;color:#fff}.light{background:#fff;color:#147d73;border:1px solid #bfddd8}.dark{background:#263f51;color:white;width:100%;margin-top:10px;padding:15px;font-size:16px}.help{font-size:12px;color:#788791;line-height:1.55}.label{font-size:13px;font-weight:800;color:#526570;margin:13px 0 7px;display:block}.preview{min-height:210px;background:#eaf7f3;border-radius:14px;display:flex;align-items:center;justify-content:center;overflow:hidden}.preview img{max-width:100%;max-height:380px;object-fit:contain}.placeholder{text-align:center;padding:28px}.placeholder b{display:block;color:#247e74;font-size:12px;letter-spacing:1px;margin-top:10px}.meta{display:flex;justify-content:space-between;font-weight:800;margin:13px 0}.count{font-size:12px;color:#84919a;font-weight:400}textarea,input[type=text]{width:100%;border:1px solid #dfe7ea;border-radius:12px;padding:12px;font:inherit;color:#213946;background:#fcfdfd}textarea{min-height:110px;line-height:1.5}.lang,.speeds,.controls{display:flex;gap:7px;margin-top:10px}.lang button,.speeds button,.controls button{flex:1;background:#f1f5f6;color:#536975}.active{background:#ddf4ee!important;color:#13796f!important;outline:1px solid #b5e2d7}.status{background:#f4f8f8;border-radius:12px;padding:11px;font-size:12px;line-height:1.6;color:#536975;margin-top:10px;white-space:pre-wrap}.thumbs{display:flex;gap:7px;overflow:auto;margin-top:10px}.thumb{min-width:54px;height:54px;padding:0;background:#f4f7f8;border:2px solid #dfe7ea;border-radius:9px;overflow:hidden}.thumb.active{border-color:#168f83}.thumb img{width:100%;height:100%;object-fit:cover}.progress{height:5px;background:#e5eeee;border-radius:8px;overflow:hidden;margin-top:10px}.bar{height:100%;width:0;background:#168f83}.footer{font-size:11px;color:#99a4aa;text-align:center;line-height:1.6;padding:8px}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body><main>
+<header><div class="logo">📚</div><div><h1>绘本识字朗读</h1><div class="sub">上传 → 自动识字 → 连续朗读</div></div></header>
+<div class="row">
+<label class="filebtn green" for="images" style="margin:0">＋ 上传图片</label>
+<label class="filebtn light" for="pdf" style="margin:0">⇧ 上传 PDF</label>
+<input id="images" type="file" accept="image/*" multiple hidden>
+<input id="pdf" type="file" accept="application/pdf,.pdf" hidden>
+</div>
+<p class="help">本版本尝试在手机浏览器本地进行 OCR。首次加载识字引擎需要联网并等待下载语言数据。请用 Safari 打开网页，不要在文件预览器中打开。PDF 会逐页转成图片后识别。</p>
+<section class="card">
+<div class="label">绘本名称</div><input type="text" id="bookname" value="我的绘本">
+<div class="preview" id="preview" style="margin-top:12px"><div class="placeholder"><div style="font-size:62px">🚗</div><b>UPLOAD A BOOK PAGE</b><div class="help">上传图片或 PDF 开始</div></div></div>
+<div class="meta"><span id="pagetitle">还没有导入绘本</span><span class="count" id="count">0 / 0</span></div>
+<div id="thumbs" class="thumbs"></div>
+<div class="row" style="margin-top:12px"><button id="ocrOne" class="light">识别本页文字</button><button id="ocrAll" class="green">识别全部页面</button></div>
+<div class="progress"><div id="bar" class="bar"></div></div><div id="status" class="status">等待上传。识别结果可能有错误，尤其是弯曲书页、装饰字体或文字较小的页面，请检查后再播放。</div>
+<label class="label" for="text">识别出的文字（可编辑）</label><textarea id="text" placeholder="识别结果会出现在这里，也可以手动修改。"></textarea>
+<div class="lang"><button id="en" class="active">🇬🇧 English</button><button id="es">🇪🇸 Español</button></div>
+<label class="label">朗读速度：<span id="rateLabel" style="color:#168f83">慢速</span></label>
+<div class="speeds"><button data-rate="0.65">很慢</button><button data-rate="0.82" class="active">慢速</button><button data-rate="1">正常</button><button data-rate="1.12">稍快</button></div>
+<button class="dark" id="read">▶ 从本页开始连续朗读</button>
+<div class="controls"><button id="prev">‹ 上一页</button><button id="stop">■ 停止</button><button id="next">下一页 ›</button></div>
+<p class="help">连续朗读时会读当前页，再自动进入下一页。点“停止”可中断。系统声音是否可用取决于 iPhone、Safari 和已安装的语音。</p>
+</section>
+<section class="card"><b>原型状态</b><div class="status">✓ 图片选择与预览<br>✓ OCR 接入（Tesseract.js，首次需联网下载引擎和语言数据）<br>✓ PDF.js 逐页渲染后可尝试 OCR<br>✓ 英语 / 西班牙语浏览器语音合成<br>△ OCR 准确率需要逐页检查<br>△ 不保证在 iOS“文件”预览界面中运行；需要由 Safari 打开可执行网页<br>△ 暂未做长期保存、账号、云同步或原生 App 安装包</div></section>
+<div class="footer">隐私提示：此页面的 OCR 设计为浏览器端处理，不主动上传绘本图片到本项目服务器；CDN 会加载代码和语言数据。请仅处理自己拥有或获授权使用的绘本。</div>
+</main>
+<script>
+if(window.pdfjsLib){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'}
+let pages=[], idx=0, lang='en-US', rate=.82, busy=false, stopFlag=false;
+const $=id=>document.getElementById(id);
+function sayStatus(t){$('status').textContent=t}
+function render(){let p=pages[idx];$('pagetitle').textContent=p?p.title:'还没有导入绘本';$('count').textContent=pages.length?`${idx+1} / ${pages.length}`:'0 / 0';$('text').value=p?.text||'';$('preview').innerHTML='';if(p?.url){let im=document.createElement('img');im.src=p.url;$('preview').appendChild(im)}else $('preview').innerHTML='<div class="placeholder"><div style="font-size:50px">📖</div><b>PAGE PREVIEW</b></div>';$('thumbs').innerHTML='';pages.forEach((x,i)=>{let b=document.createElement('button');b.className='thumb'+(i===idx?' active':'');if(x.url){let im=document.createElement('img');im.src=x.url;b.appendChild(im)}else b.textContent=i+1;b.onclick=()=>{saveText();idx=i;speechSynthesis.cancel();render()};$('thumbs').appendChild(b)})}
+function saveText(){if(pages[idx])pages[idx].text=$('text').value}
+function setLang(v){lang=v;$('en').classList.toggle('active',v==='en-US');$('es').classList.toggle('active',v==='es-ES')}
+$('en').onclick=()=>setLang('en-US');$('es').onclick=()=>setLang('es-ES');
+document.querySelectorAll('[data-rate]').forEach(b=>b.onclick=()=>{rate=+b.dataset.rate;document.querySelectorAll('[data-rate]').forEach(x=>x.classList.toggle('active',x===b));$('rateLabel').textContent=b.textContent});
+$('text').addEventListener('input',saveText);
+$('images').onchange=e=>{let fs=[...e.target.files];if(!fs.length)return;pages=fs.map((f,i)=>({title:`图片 ${i+1}`,url:URL.createObjectURL(f),file:f,text:''}));idx=0;$('bookname').value='图片绘本';render();sayStatus(`已导入 ${pages.length} 张图片。点击“识别全部页面”。`);e.target.value=''};
+$('pdf').onchange=async e=>{let f=e.target.files[0];if(!f)return;if(!window.pdfjsLib){alert('PDF 组件加载失败。请确认网络正常，并在 Safari 中重新打开。');return}pages=[];idx=0;$('bookname').value=f.name;render();sayStatus('正在打开 PDF 并逐页转换为图片……');try{let data=await f.arrayBuffer();let pdf=await pdfjsLib.getDocument({data}).promise;for(let n=1;n<=pdf.numPages;n++){sayStatus(`正在准备 PDF 页面 ${n}/${pdf.numPages}……`);let page=await pdf.getPage(n);let viewport=page.getViewport({scale:1.5});let canvas=document.createElement('canvas');canvas.width=viewport.width;canvas.height=viewport.height;await page.render({canvasContext:canvas.getContext('2d'),viewport}).promise;let blob=await new Promise(r=>canvas.toBlob(r,'image/jpeg',.88));pages.push({title:`PDF 第 ${n} 页`,url:URL.createObjectURL(blob),file:blob,text:''})}idx=0;render();sayStatus(`PDF 已转换为 ${pages.length} 页图片。点击“识别全部页面”提取文字。`)}catch(err){sayStatus('PDF 读取失败：'+err.message+'。请尝试上传页面图片。')}e.target.value=''};
+async function ocrPage(i){if(!window.Tesseract)throw new Error('OCR 引擎加载失败，请检查网络并重新打开页面');let p=pages[i];if(!p) return;let langCode=lang==='es-ES'?'spa':'eng';sayStatus(`正在识别第 ${i+1}/${pages.length} 页。首次识别需下载 ${langCode} 语言数据，请耐心等待……`);let result=await Tesseract.recognize(p.url,langCode,{logger:m=>{if(m.status==='recognizing text'){$('bar').style.width=Math.round(m.progress*100)+'%';sayStatus(`第 ${i+1}/${pages.length} 页：正在识字 ${Math.round(m.progress*100)}%`)}}});p.text=result.data.text.trim();if(i===idx)$('text').value=p.text}
+$('ocrOne').onclick=async()=>{saveText();if(!pages.length){alert('请先上传图片或 PDF。');return}try{await ocrPage(idx);sayStatus(`第 ${idx+1} 页识别完成。请检查文字，再点击朗读。`)}catch(e){sayStatus('识别失败：'+e.message)}};
+$('ocrAll').onclick=async()=>{saveText();if(!pages.length){alert('请先上传图片或 PDF。');return}if(busy)return;busy=true;try{for(let i=0;i<pages.length;i++){await ocrPage(i);$('bar').style.width=Math.round((i+1)/pages.length*100)+'%'}render();sayStatus(`全部 ${pages.length} 页识别完成。请抽查并修正识别结果。`)}catch(e){sayStatus('识别失败：'+e.message)}finally{busy=false}};
+function speakPage(i,auto){if(stopFlag||i>=pages.length)return;idx=i;render();let t=(pages[i].text||'').trim();if(!t){sayStatus(`第 ${i+1} 页没有识别文字，请先执行 OCR。`);return}let u=new SpeechSynthesisUtterance(t);u.lang=lang;u.rate=rate;u.onend=()=>{if(auto&&!stopFlag&&i+1<pages.length){speakPage(i+1,true)}else if(i+1>=pages.length)sayStatus('整本绘本朗读完毕。')};u.onerror=()=>sayStatus('朗读失败。请在 Safari 中打开，并检查 iPhone 静音/语音设置。');speechSynthesis.speak(u)}
+$('read').onclick=()=>{saveText();if(!pages.length){alert('请先上传绘本。');return}stopFlag=false;speechSynthesis.cancel();if(!pages[idx].text.trim()){$('ocrOne').click();sayStatus('本页还没有文字，请先等待 OCR 识别完成，再点击朗读。');return}speakPage(idx,true)};
+$('stop').onclick=()=>{stopFlag=true;speechSynthesis.cancel();sayStatus('已停止朗读。')};
+$('prev').onclick=()=>{saveText();stopFlag=true;speechSynthesis.cancel();idx=Math.max(0,idx-1);render()};
+$('next').onclick=()=>{saveText();stopFlag=true;speechSynthesis.cancel();idx=Math.min(pages.length-1,idx+1);render()};
+render();
+</script></body></html>
